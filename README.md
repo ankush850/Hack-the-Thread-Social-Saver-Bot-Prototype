@@ -16,6 +16,13 @@ A smart bookmarking tool that saves and organizes links from WhatsApp messages, 
 
 Social Saver Bot helps you never lose interesting links shared on WhatsApp again. Simply forward messages containing links to your bot, and they'll be automatically saved, organized by platform, and accessible through a beautiful dashboard.
 
+
+# Watch demo video 
+
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=flat&logo=google-drive)](https://drive.google.com/file/d/1ykjenvMyH7XygMGk8JxJesTQdCHNkvxi/view?usp=drive_link)
+
+## click on this badge to see
+
 ### Perfect for:
 - **Content curators** saving inspiration from social media
 - **Researchers** collecting resources from WhatsApp groups
@@ -40,6 +47,9 @@ Automatically detects and tags links from:
 - Dribbble
 - Blog posts (Medium, Substack, etc.)
 - Other websites
+
+  
+
 
 ## 🛠️ Tech Stack
 
