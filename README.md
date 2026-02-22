@@ -19,7 +19,7 @@ Social Saver Bot helps you never lose interesting links shared on WhatsApp again
 
 # Watch demo video 
 
-[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=flat&logo=google-drive)](https://drive.google.com/file/d/1ykjenvMyH7XygMGk8JxJesTQdCHNkvxi/view?usp=drive_link)  <==>  ## Click on this badge to see.
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=flat&logo=google-drive)]([https://drive.google.com/file/d/1ykjenvMyH7XygMGk8JxJesTQdCHNkvxi/view?usp=drive_link](https://drive.google.com/file/d/1Dr9oSCd3N0Fe1D26EYpaHt8xuLw13O-b/view?usp=drive_link))  <==>  ## Click on this badge to see.
 
 ### Perfect for:
 - **Content curators** saving inspiration from social media
@@ -167,7 +167,7 @@ cd Hack-the-Thread-Social-Saver-Bot-Prototype
 ```bash
 npm install
 ```
-# *IMP = After getting node_modules go copy-paste to whatsapp-worker
+[![Important](https://img.shields.io/badge/IMPORTANT-Read_First-red?style=flat&logo=alert)](#)  After getting node_modules go copy-paste to whatsapp-worker
 
 
 3. **Install dependencies for the WhatsApp Worker**
@@ -283,4 +283,24 @@ hack-the-thread-social-saver-bot/
 ├── tailwind.config.ts
 ├── next.config.mjs
 └── README.md
+```
+
+ # Bot Flow
+``` mermaid
+flowchart TD
+    %% Main Flow
+    User([Your Application]) -->|POST /send-message| API[Express API]
+    API -->|Adds to| Queue[(Message Queue)]
+    
+    Queue -->|Triggers| Processor[Background Queue Processor]
+    
+    Processor -->|Takes next task| WA[WhatsApp Web Client]
+    
+    WA -->|1. Verifies Phone Number| WA
+    WA -->|2. Sends Message| Recipient([Recipient WhatsApp])
+    WA -->|3. Waits 20 seconds| WA
+    
+    %% The looping behavior
+    WA -.->|4. Puts task back at end of queue| Queue
+
 ```
