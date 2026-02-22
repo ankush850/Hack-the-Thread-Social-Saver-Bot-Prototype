@@ -14,8 +14,10 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 import { EmailShareDialog } from "@/components/email-share-dialog"
 import { WhatsAppShareDialog } from "@/components/whatsapp-share-dialog"
+import { useAuth } from "@/components/auth-provider"
 import type { Platform } from "@/lib/data"
 import { platformMeta, allPlatforms } from "@/lib/platforms"
 import {
@@ -27,6 +29,7 @@ import {
   FileText,
   Globe,
   LayoutGrid,
+  LogOut,
 } from "lucide-react"
 
 const platformIcons: Record<Platform, React.ComponentType<{ className?: string }>> = {
@@ -51,6 +54,8 @@ export function SidebarNav({
   platformCounts,
   totalCount,
 }: SidebarNavProps) {
+  const { logout } = useAuth()
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -113,6 +118,15 @@ export function SidebarNav({
       <SidebarFooter className="flex flex-col gap-2 p-4">
         <WhatsAppShareDialog />
         <EmailShareDialog />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-muted-foreground"
+          onClick={() => logout()}
+        >
+          <LogOut className="size-4" />
+          Log out
+        </Button>
       </SidebarFooter>
     </Sidebar>
   )
