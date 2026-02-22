@@ -105,6 +105,17 @@ graph TB
     
     Database[(Database)] <-->|Reads/Writes data| SSB
 ```
+## Entity Relationships
+
+```mermaid
+erDiagram
+    User ||--o{ Session : has
+    User ||--o{ Link : saves
+    User ||--o{ Otp : requests
+    Session }o--|| User : belongs-to
+    Link }o--|| User : belongs-to
+    Otp }o--|| User : belongs-to
+```
 
 
 
