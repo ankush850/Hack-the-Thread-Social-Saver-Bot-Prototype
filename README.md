@@ -19,9 +19,7 @@ Social Saver Bot helps you never lose interesting links shared on WhatsApp again
 
 # Watch demo video 
 
-[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=flat&logo=google-drive)](https://drive.google.com/file/d/1ykjenvMyH7XygMGk8JxJesTQdCHNkvxi/view?usp=drive_link)
-
-## click on this badge to see
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=flat&logo=google-drive)](https://drive.google.com/file/d/1ykjenvMyH7XygMGk8JxJesTQdCHNkvxi/view?usp=drive_link)  <==>  ## Click on this badge to see.
 
 ### Perfect for:
 - **Content curators** saving inspiration from social media
