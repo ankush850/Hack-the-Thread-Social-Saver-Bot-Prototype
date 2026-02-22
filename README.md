@@ -75,45 +75,72 @@ Automatically detects and tags links from:
 
 ##  Authentication Flow
 
-``` mermaid
+```mermaid
 graph TD
-    A[Enter Email/Phone] --> B[Request OTP]
-    B --> C[Receive OTP]
-    C --> D[Verify OTP]
-    D --> E[Session Created]
-    E --> F[Access Dashboard]
+    A[Enter Email or Phone Number] -->|Submit| B(API: Generate & Store OTP)
+    B --> C{Delivery Method}
+    C -->|Email| D[Send via Email Service]
+    C -->|Phone| E[Send via WhatsApp Worker]
+    D --> F[User Receives OTP]
+    E --> F
+    F -->|Input Code| G(API: Verify OTP against DB)
+    G -->|Success| H[Create Session & Redirect to Dashboard]
+    G -->|Failure| I[Show Error Message]
 ```
-
-
 
 ## Data Flow Diagram
 
 ```mermaid
 graph TB
-    subgraph "Social Saver Bot System"
-        SSB[Social Saver Bot]
+    subgraph "Social Saver Platform"
+        FE[Next.js Frontend Dashboard]
+        API[Next.js APIs & Webhooks]
+        Worker[Node.js WhatsApp Worker]
+        DB[(SQLite / PostgreSQL via Prisma)]
     end
 
-    User((User)) -->|Interacts with| SSB
-    SSB -->|Displays dashboard| User
+    User((User)) -->|Views & Manages Links| FE
+    FE <-->|Fetches & Actions| API
     
-    WhatsApp((WhatsApp)) -->|Sends messages with links| SSB
-    SSB -->|Confirms receipt| WhatsApp
+    WhatsApp((User's WhatsApp)) -->|Forwards Links| Worker
+    Worker -->|Saves link payload| API
+    API -->|Triggers reply| Worker
+    Worker -->|Sends Confirmation| WhatsApp
     
-    Email((Email)) <-->|Sends shared links| SSB
-    
-    Database[(Database)] <-->|Reads/Writes data| SSB
+    API <-->|Reads/Writes Data| DB
 ```
 ## Entity Relationships
 
 ```mermaid
 erDiagram
-    User ||--o{ Session : has
-    User ||--o{ Link : saves
-    User ||--o{ Otp : requests
-    Session }o--|| User : belongs-to
-    Link }o--|| User : belongs-to
-    Otp }o--|| User : belongs-to
+    User {
+        String id PK
+        String identifier UK
+        String type
+        DateTime createdAt
+    }
+    Session {
+        String id PK
+        String userId FK
+        DateTime expiresAt
+    }
+    Link {
+        String id PK
+        String name
+        String url
+        String description
+        String platform
+        DateTime createdAt
+        String userId FK
+    }
+    Otp {
+        String identifier PK
+        String code
+        DateTime expiresAt
+    }
+
+    User ||--o{ Session : "has"
+    User ||--o{ Link : "saves"
 ```
 ## 🚀 Getting Started
 
@@ -128,43 +155,60 @@ Git
 ### Installation Steps
 
 
-Clone the repository
+1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/hack-the-thread-social-saver-bot.git
-cd hack-the-thread-social-saver-bot
+git clone https://github.com/ankush850/Hack-the-Thread-Social-Saver-Bot-Prototype.git
+cd Hack-the-Thread-Social-Saver-Bot-Prototype
 ```
-Install dependencies
+
+2. **Install dependencies for the main app**
 
 ```bash
 npm install
-
 ```
 
-Set up environment variables
+3. **Install dependencies for the WhatsApp Worker**
+
+```bash
+cd whatsapp-worker
+npm install
+cd ..
+```
+
+4. **Set up environment variables**
 
 ```bash
 cp .env.example .env
-Default .env configuration:
-
-env
-DATABASE_URL="file:./dev.db"
+# Update the .env file with your required configuration.
 ```
 
-Initialize the database
+5. **Initialize the database**
 
 ```bash
 npm run db:migrate
 ```
-Start the development server
+
+6. **Start the development server (Main App)**
 
 ```bash
 npm run dev
 ```
-Open your browser
+
+7. **Start the WhatsApp Worker**
+Open a new terminal session, run the following to start the worker, and scan the QR code to link your WhatsApp:
+
 ```bash
-Navigate to http://localhost:3000
+# On Windows
+start-worker.bat
+
+# Or manually
+cd whatsapp-worker
+npm start
 ```
+
+8. **Open your browser**
+Navigate to `http://localhost:3000` to interact with the frontend.
 ## Project Structure
 
 ```
@@ -226,11 +270,15 @@ hack-the-thread-social-saver-bot/
 │   ├── migrations/
 │   └── dev.db
 ├── public/
+├── whatsapp-worker/
+│   ├── index.js
+│   └── package.json
 ├── .env.example
 ├── .gitignore
 ├── package.json
+├── start-worker.bat
 ├── tsconfig.json
 ├── tailwind.config.ts
-├── next.config.js
+├── next.config.mjs
 └── README.md
 ```

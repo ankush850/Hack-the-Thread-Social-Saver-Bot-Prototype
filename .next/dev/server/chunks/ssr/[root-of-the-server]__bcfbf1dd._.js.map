@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":["file:///D:/Hack-the-Thread-Social-Saver-Bot-Prototype/components/theme-provider.tsx"],"sourcesContent":["'use client'\r\n\r\nimport * as React from 'react'\r\nimport {\r\n  ThemeProvider as NextThemesProvider,\r\n  type ThemeProviderProps,\r\n} from 'next-themes'\r\n\r\nexport function ThemeProvider({ children, ...props }: ThemeProviderProps) {\r\n  return <NextThemesProvider {...props}>{children}</NextThemesProvider>\r\n}\r\n"],"names":[],"mappings":";;;;;AAGA;AAHA;;;AAQO,SAAS,cAAc,EAAE,QAAQ,EAAE,GAAG,OAA2B;IACtE,qBAAO,8OAAC,iKAAkB;QAAE,GAAG,KAAK;kBAAG;;;;;;AACzC"}}]
+}

@@ -1,0 +1,3 @@
+{
+  "/api/auth/request-otp/route": "app/api/auth/request-otp/route.js"
+}

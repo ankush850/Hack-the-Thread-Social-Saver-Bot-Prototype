@@ -8,6 +8,7 @@ import { StatsBar } from "@/components/stats-bar"
 import { SearchBar } from "@/components/search-bar"
 import { LinkGrid } from "@/components/link-grid"
 import { AddLinkDialog } from "@/components/add-link-dialog"
+import { SendWhatsAppDialog } from "@/components/send-whatsapp-dialog"
 import { Separator } from "@/components/ui/separator"
 import type { Platform, SavedLink } from "@/lib/data"
 import { toast } from "sonner"
@@ -101,7 +102,10 @@ export function Dashboard() {
           <Separator orientation="vertical" className="h-5" />
           <div className="flex flex-1 items-center justify-between gap-4">
             <SearchBar onSearch={handleSearch} />
-            <AddLinkDialog onAdded={() => mutate()} />
+            <div className="flex items-center gap-2">
+              <SendWhatsAppDialog />
+              <AddLinkDialog onAdded={() => mutate()} />
+            </div>
           </div>
         </header>
 
