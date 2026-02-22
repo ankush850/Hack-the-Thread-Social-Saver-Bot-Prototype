@@ -167,6 +167,8 @@ cd Hack-the-Thread-Social-Saver-Bot-Prototype
 ```bash
 npm install
 ```
+# *IMP = After getting node_modules go copy-paste to whatsapp-worker
+
 
 3. **Install dependencies for the WhatsApp Worker**
 
