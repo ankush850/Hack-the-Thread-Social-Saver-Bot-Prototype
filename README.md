@@ -7,6 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.2-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
 [![Prisma](https://img.shields.io/badge/Prisma-6.4-2D3748?style=flat&logo=prisma)](https://www.prisma.io)
 [![GitHub Repo](https://img.shields.io/badge/github-repo-black?style=flat&logo=github)](https://github.com/ankush850/Hack-the-Thread-Social-Saver-Bot-Prototype)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 A smart bookmarking tool that saves and organizes links from WhatsApp messages, with a beautiful dashboard to view, search, filter, and share your saved content.
 
