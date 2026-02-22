@@ -1,125 +1,406 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+"use client"
 
-@custom-variant dark (&:is(.dark *));
+import { useMemo } from "react"
+import { useAppStore } from "@/lib/store"
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card"
+
+import { Badge } from "@/components/ui/badge"
+
+import {
+  TrendingUp,
+  AlertTriangle,
+  Info,
+  Activity,
+  BarChart3,
+  Sigma,
+} from "lucide-react"
+
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts"
+
+/* ============================================================
+   TYPES
+============================================================ */
+
+type CombinedPoint = {
+  month: string
+  revenue: number | null
+  predicted: number | null
+  lower: number | null
+  upper: number | null
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+/* ============================================================
+   ANALYTICS ENGINE
+============================================================ */
+
+function useForecastAnalytics(forecast: any) {
+  return useMemo(() => {
+    if (!forecast) return null
+
+    const historical = forecast.historical
+    const predicted = forecast.predicted
+
+    /* ---------------- COMBINED SERIES ---------------- */
+
+    const combined: CombinedPoint[] = [
+      ...historical.map((h: any) => ({
+        month: h.month,
+        revenue: h.revenue,
+        predicted: null,
+        lower: null,
+        upper: null,
+      })),
+      {
+        month: historical.at(-1)?.month,
+        revenue: historical.at(-1)?.revenue,
+        predicted: historical.at(-1)?.revenue,
+        lower: historical.at(-1)?.revenue,
+        upper: historical.at(-1)?.revenue,
+      },
+      ...predicted.map((p: any) => ({
+        month: p.month,
+        revenue: null,
+        predicted: p.revenue,
+        lower: p.lower,
+        upper: p.upper,
+      })),
+    ]
+
+    /* ---------------- STATS ---------------- */
+
+    const values = historical.map((h: any) => h.revenue)
+
+    const mean =
+      values.reduce((a: number, b: number) => a + b, 0) /
+      values.length
+
+    const std = Math.sqrt(
+      values.reduce(
+        (s: number, v: number) => s + (v - mean) ** 2,
+        0
+      ) / values.length
+    )
+
+    const anomalies = historical.filter(
+      (h: any) =>
+        Math.abs(h.revenue - mean) > 1.5 * std
+    )
+
+    const growth =
+      (predicted.at(-1).revenue -
+        historical.at(-1).revenue) /
+      historical.at(-1).revenue
+
+    const confidence =
+      predicted.reduce((sum: number, p: any) => {
+        const range = p.upper - p.lower
+        return sum + (1 - range / (p.revenue * 2))
+      }, 0) / predicted.length
+
+    return {
+      combined,
+      anomalies,
+      mean,
+      std,
+      growth,
+      confidence,
+    }
+  }, [forecast])
 }
 
-@theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+/* ============================================================
+   KPI CARD
+============================================================ */
+
+function MetricCard({
+  title,
+  value,
+  icon: Icon,
+}: any) {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between p-5">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            {title}
+          </p>
+          <p className="text-xl font-semibold">
+            {value}
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-muted p-2">
+          <Icon className="h-5 w-5" />
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* ============================================================
+   CUSTOM TOOLTIP
+============================================================ */
+
+function ForecastTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null
+
+  const d = payload[0].payload
+
+  return (
+    <div className="rounded-lg border bg-card p-3 text-xs shadow-md">
+      <p className="font-medium">{d.month}</p>
+
+      {d.revenue && (
+        <p>Actual: ${d.revenue.toLocaleString()}</p>
+      )}
+
+      {d.predicted && (
+        <p>Forecast: ${d.predicted.toLocaleString()}</p>
+      )}
+    </div>
+  )
+}
+
+/* ============================================================
+   FORECAST CHART
+============================================================ */
+
+function ForecastChart({ data }: any) {
+  return (
+    <div className="h-[360px]">
+      <ResponsiveContainer>
+        <AreaChart data={data}>
+          <CartesianGrid
+            stroke="var(--border)"
+            vertical={false}
+          />
+
+          <XAxis dataKey="month" />
+
+          <YAxis
+            tickFormatter={(v) =>
+              `$${(v / 1000).toFixed(0)}K`
+            }
+          />
+
+          <Tooltip content={<ForecastTooltip />} />
+
+          <Area
+            dataKey="upper"
+            stroke="none"
+            fill="var(--chart-2)"
+            fillOpacity={0.05}
+          />
+
+          <Area
+            dataKey="lower"
+            stroke="none"
+            fill="var(--background)"
+          />
+
+          <Area
+            dataKey="revenue"
+            stroke="var(--chart-1)"
+            fillOpacity={0.15}
+            fill="var(--chart-1)"
+          />
+
+          <Area
+            dataKey="predicted"
+            stroke="var(--chart-2)"
+            strokeDasharray="6 4"
+            fillOpacity={0.1}
+            fill="var(--chart-2)"
+          />
+
+          <ReferenceLine
+            y={0}
+            stroke="var(--border)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+/* ============================================================
+   ANOMALY PANEL
+============================================================ */
+
+function AnomalyPanel({
+  anomalies,
+  mean,
+}: any) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          Anomaly Detection
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {anomalies.length ? (
+          anomalies.map((a: any) => (
+            <div
+              key={a.month}
+              className="flex justify-between
+              rounded-lg bg-chart-3/10 p-3"
+            >
+              <div className="flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-chart-3" />
+                {a.month}
+              </div>
+
+              ${a.revenue.toLocaleString()}
+            </div>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No statistical anomalies detected.
+          </p>
+        )}
+
+        <p className="text-xs text-muted-foreground">
+          Mean revenue μ = ${mean.toLocaleString()}
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+/* ============================================================
+   MAIN VIEW (~500 lines total)
+============================================================ */
+
+export function ForecastView() {
+  const { forecast, modelMetrics } =
+    useAppStore()
+
+  const analytics =
+    useForecastAnalytics(forecast)
+
+  if (!analytics)
+    return (
+      <div className="flex-center py-24 flex-col gap-3">
+        <TrendingUp />
+        Load dataset first
+      </div>
+    )
+
+  return (
+    <div className="space-y-6">
+
+      {/* HEADER */}
+
+      <div className="flex justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">
+            Revenue Forecast
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Predictive analytics dashboard
+          </p>
+        </div>
+
+        <Badge variant="outline">
+          R² {modelMetrics.r2.toFixed(3)}
+        </Badge>
+      </div>
+
+      {/* KPI GRID */}
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <MetricCard
+          title="Confidence"
+          value={`${(
+            analytics.confidence * 100
+          ).toFixed(1)}%`}
+          icon={Activity}
+        />
+
+        <MetricCard
+          title="Growth"
+          value={`${(
+            analytics.growth * 100
+          ).toFixed(1)}%`}
+          icon={TrendingUp}
+        />
+
+        <MetricCard
+          title="Std Dev"
+          value={analytics.std.toFixed(0)}
+          icon={Sigma}
+        />
+
+        <MetricCard
+          title="Anomalies"
+          value={analytics.anomalies.length}
+          icon={BarChart3}
+        />
+      </div>
+
+      {/* CHART */}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Historical & Forecast Trend
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <ForecastChart
+            data={analytics.combined}
+          />
+        </CardContent>
+      </Card>
+
+      {/* LOWER PANELS */}
+
+      <div className="grid lg:grid-cols-2 gap-4">
+        <AnomalyPanel
+          anomalies={analytics.anomalies}
+          mean={analytics.mean}
+        />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Model Summary
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="text-sm space-y-2">
+            <div className="flex gap-2">
+              <Info className="h-4 w-4 text-primary" />
+              Dataset size:
+              {modelMetrics.datasetSize.toLocaleString()}
+            </div>
+
+            <p className="text-muted-foreground">
+              Linear regression forecasting with
+              rolling statistical validation.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+    </div>
+  )
 }
