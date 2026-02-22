@@ -54,7 +54,19 @@ export async function POST(request: NextRequest) {
       // Include OTP in response for MVP/demo purposes only
       _dev_otp: otp,
     })
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[request-otp] Error:", err)
+      const msg = err instanceof Error ? err.message : String(err)
+      const hint =
+        msg.includes("no such table") || msg.includes("does not exist")
+          ? " Run: npm run db:migrate"
+          : ""
+      return NextResponse.json(
+        { error: "Failed to process request", _dev: msg + hint },
+        { status: 500 }
+      )
+    }
     return NextResponse.json(
       { error: "Failed to process request" },
       { status: 500 }
