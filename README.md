@@ -75,4 +75,16 @@ Automatically detects and tags links from:
 | Custom Validation | Input validation utilities |
 
 
+##  Authentication Flow
+
+``` mermaid
+graph TD
+    A[Enter Email/Phone] --> B[Request OTP]
+    B --> C[Receive OTP]
+    C --> D[Verify OTP]
+    D --> E[Session Created]
+    E --> F[Access Dashboard]
+```
+
+
 
