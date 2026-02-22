@@ -1,0 +1,176 @@
+// lib/api.ts
+import { z } from 'zod';
+
+// Type definitions
+interface ApiResponse<T> {
+  data: T | null;
+  error: string | null;
+  loading: boolean;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
+// Validation schema using zod
+const userSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  createdAt: z.date(),
+});
+
+// Custom error class
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public details?: unknown
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// API client configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.example.com';
+
+class ApiClient {
+  private baseUrl: string;
+  private defaultHeaders: HeadersInit;
+
+  constructor(baseUrl: string = API_BASE_URL) {
+    this.baseUrl = baseUrl;
+    this.defaultHeaders = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    try {
+      const url = `${this.baseUrl}${endpoint}`;
+      const config: RequestInit = {
+        ...options,
+        headers: {
+          ...this.defaultHeaders,
+          ...options.headers,
+        },
+      };
+
+      const response = await fetch(url, config);
+
+      if (!response.ok) {
+        throw new ApiError(
+          `HTTP error! status: ${response.status}`,
+          response.status,
+          await response.json()
+        );
+      }
+
+      const data = await response.json();
+      const validatedData = userSchema.parse(data) as T;
+
+      return {
+        data: validatedData,
+        error: null,
+        loading: false,
+      };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return {
+          data: null,
+          error: error.message,
+          loading: false,
+        };
+      }
+
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        loading: false,
+      };
+    }
+  }
+
+  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { method: 'GET' });
+  }
+
+  async post<T, U>(endpoint: string, body: U): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async put<T, U>(endpoint: string, body: U): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { method: 'DELETE' });
+  }
+}
+
+// Export singleton instance
+export const apiClient = new ApiClient();
+
+// Export utility functions
+export async function fetchUser(userId: string): Promise<ApiResponse<User>> {
+  return apiClient.get<User>(`/users/${userId}`);
+}
+
+export async function createUser(
+  userData: Omit<User, 'id' | 'createdAt'>
+): Promise<ApiResponse<User>> {
+  return apiClient.post<User, typeof userData>('/users', userData);
+}
+
+export async function updateUser(
+  userId: string,
+  userData: Partial<Omit<User, 'id' | 'createdAt'>>
+): Promise<ApiResponse<User>> {
+  return apiClient.put<User, typeof userData>(`/users/${userId}`, userData);
+}
+
+export async function deleteUser(userId: string): Promise<ApiResponse<void>> {
+  return apiClient.delete<void>(`/users/${userId}`);
+}
+
+// Type guard functions
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError;
+}
+
+export function isUser(data: unknown): data is User {
+  try {
+    userSchema.parse(data);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Utility type helpers
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
+// Constants
+export const API_ENDPOINTS = {
+  USERS: '/users',
+  AUTH: '/auth',
+  PRODUCTS: '/products',
+} as const;
+
+// Export types for external use
+export type { ApiResponse, User };
