@@ -166,4 +166,72 @@ Open your browser
 ```bash
 Navigate to http://localhost:3000
 ```
+## Project Structure
 
+```
+hack-the-thread-social-saver-bot/
+├── app/
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── request-otp/
+│   │   │   │   └── route.ts
+│   │   │   ├── verify-otp/
+│   │   │   │   └── route.ts
+│   │   │   ├── session/
+│   │   │   │   └── route.ts
+│   │   │   └── logout/
+│   │   │       └── route.ts
+│   │   ├── links/
+│   │   │   ├── route.ts
+│   │   │   └── [id]/
+│   │   │       └── route.ts
+│   │   ├── share-email/
+│   │   │   └── route.ts
+│   │   └── webhook/
+│   │       └── route.ts
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── components/
+│   ├── auth/
+│   │   ├── auth-provider.tsx
+│   │   ├── auth-gate.tsx
+│   │   └── login-form.tsx
+│   ├── dashboard/
+│   │   ├── dashboard.tsx
+│   │   ├── add-link-dialog.tsx
+│   │   ├── link-grid.tsx
+│   │   ├── link-card.tsx
+│   │   ├── search-bar.tsx
+│   │   ├── stats-bar.tsx
+│   │   ├── sidebar-nav.tsx
+│   │   └── email-share-dialog.tsx
+│   ├── ui/
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── dialog.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   └── skeleton.tsx
+│   └── theme-provider.tsx
+├── lib/
+│   ├── auth.ts
+│   ├── data.ts
+│   ├── db.ts
+│   ├── utils.ts
+│   └── platforms.ts
+├── prisma/
+│   ├── schema.prisma
+│   ├── migrations/
+│   └── dev.db
+├── public/
+├── .env.example
+├── .gitignore
+├── package.json
+├── tsconfig.json
+├── tailwind.config.ts
+├── next.config.js
+└── README.md
+```
