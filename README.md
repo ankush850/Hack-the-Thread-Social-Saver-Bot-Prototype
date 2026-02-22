@@ -116,6 +116,54 @@ erDiagram
     Link }o--|| User : belongs-to
     Otp }o--|| User : belongs-to
 ```
+## 🚀 Getting Started
+
+### Prerequisites
+
+```bash
+Node.js 18.17 or later
+npm or yarn package manager
+Git
+(Optional) PostgreSQL for production
+```
+### Installation Steps
 
 
+Clone the repository
+
+```bash
+git clone https://github.com/yourusername/hack-the-thread-social-saver-bot.git
+cd hack-the-thread-social-saver-bot
+```
+Install dependencies
+
+```bash
+npm install
+
+```
+
+Set up environment variables
+
+```bash
+cp .env.example .env
+Default .env configuration:
+
+env
+DATABASE_URL="file:./dev.db"
+```
+
+Initialize the database
+
+```bash
+npm run db:migrate
+```
+Start the development server
+
+```bash
+npm run dev
+```
+Open your browser
+```bash
+Navigate to http://localhost:3000
+```
 
