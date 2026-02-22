@@ -40,10 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function checkSession() {
       try {
-        const res = await fetch("/api/auth/session")
+        const res = await fetch("/api/auth/session", { credentials: "include" })
         if (res.ok) {
           const data = await res.json()
-          if (data.authenticated) {
+          if (data.authenticated && data.user) {
             setUser(data.user)
           }
         }
